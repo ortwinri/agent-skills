@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Installiert die Skills aus diesem Repo für alle gängigen KI-Tools.
 #
-#   ./install.sh <projektordner>   Kopie nach <projekt>/.agents/skills + Links für Claude Code und Copilot
-#   ./install.sh --user            Links nach ~/.agents/skills und ~/.claude/skills (Updates per git pull)
+#   ./install.sh <projektordner>   Kopie nach <projekt>/.agents/skills + Links für Claude Code, Copilot, Gemini CLI
+#   ./install.sh --user            Links nach ~/.agents, ~/.claude, ~/.gemini (Updates per git pull)
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -25,24 +25,27 @@ link() { # <ziel> <linkpfad>
 [ $# -eq 1 ] || usage
 
 if [ "$1" = "--user" ]; then
-  mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills"
-  for skill in "$SKILLS_DIR"/*/; do
-    name="$(basename "$skill")"
-    link "$SKILLS_DIR/$name" "$HOME/.agents/skills/$name"
-    link "$SKILLS_DIR/$name" "$HOME/.claude/skills/$name"
+  for tool in .agents .claude .gemini; do
+    mkdir -p "$HOME/$tool/skills"
+    for skill in "$SKILLS_DIR"/*/; do
+      name="$(basename "$skill")"
+      link "$SKILLS_DIR/$name" "$HOME/$tool/skills/$name"
+    done
   done
   exit 0
 fi
 
 PROJECT="$(cd "$1" && pwd)" || usage
-mkdir -p "$PROJECT/.agents/skills" "$PROJECT/.claude/skills" "$PROJECT/.github/skills"
+mkdir -p "$PROJECT/.agents/skills"
 for skill in "$SKILLS_DIR"/*/; do
   name="$(basename "$skill")"
   rm -rf "$PROJECT/.agents/skills/$name"
   cp -R "$SKILLS_DIR/$name" "$PROJECT/.agents/skills/$name"
   echo "  kopiert:  $PROJECT/.agents/skills/$name"
   # Relative Links, damit sie nach dem Commit bei allen funktionieren.
-  link "../../.agents/skills/$name" "$PROJECT/.claude/skills/$name"
-  link "../../.agents/skills/$name" "$PROJECT/.github/skills/$name"
+  for tool in .claude .github .gemini; do
+    mkdir -p "$PROJECT/$tool/skills"
+    link "../../.agents/skills/$name" "$PROJECT/$tool/skills/$name"
+  done
 done
 echo "Fertig. Änderungen im Projekt prüfen und committen."
