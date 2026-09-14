@@ -1,0 +1,9 @@
+{
+  "name": "agent-skills",
+  "displayName": "Agent Skills",
+  "version": "1.0.0",
+  "description": "Team-Skills für KI-Coding-Tools, u. a. intake-to-issue.",
+  "author": {
+    "name": "ortwinri"
+  }
+}
